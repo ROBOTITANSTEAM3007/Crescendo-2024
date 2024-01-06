@@ -8,6 +8,8 @@
 
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
+#include <frc/kinematics/SwerveDriveKinematics.h> // Added!
+//https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html
 
 class Robot : public frc::TimedRobot {
  public:
