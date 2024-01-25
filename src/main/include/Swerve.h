@@ -14,9 +14,9 @@ class swerveWheel{
     public:
 
         //Polarity of 0 means that 0 degrees = 0, polarity of 1 means that 180 degrees = 0
-        void setRotation(double targetAngle, bool *polarity, double turn);
+        void setRotation(double targetAngle);
     
-        void setDrive(bool polarity, double driveMag);
+        void setDrive(double driveMag);
 
         //Takes 3 arguments, CAN ID for drive wheel, rotation wheel, and cancoder
         swerveWheel(short driveCAN, short rotationCAN, short encoderCAN, double p, double i, double d);
@@ -27,6 +27,9 @@ class swerveWheel{
         //Tells motors to not turn
         void chill();
 
+        //Get closest angle between two angles
+        double closestAngle(double a, double b);
+
         std::string m_wheelName;
 
         double currentAngle;
@@ -36,6 +39,8 @@ class swerveWheel{
         bool inverted = 0;
 
         ctre::phoenix6::hardware::CANcoder* encoder;
+
+        double m_turnAngle;
 
 
 
@@ -51,7 +56,13 @@ class swerveWheel{
         rev::CANSparkMax* m_rotationMotor;
 
 
-        double flippedAngle;
+
+
+        double m_bestTargetAngle;
+        double m_setPointAngle;
+        double m_setPointAngleFlipped;
+
+
 
 
         double m_p;
@@ -90,8 +101,9 @@ class swerveDrive  {
         // Calibrate PID on each wheel
         void calibPID();
 
+        void calculateTurn();
 
-
+        void inPlaceTurn();
 
 
 
@@ -133,8 +145,8 @@ class swerveDrive  {
 
         double m_magnitude;
 
-        //Polarity of 0 means that 0 degrees = 0, polarity of 1 means that 270 degrees = 0
-        bool m_polarity;
+        double m_twistAngle;
+
 
 
         double m_calibAngle = 0;

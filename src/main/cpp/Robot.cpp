@@ -23,6 +23,8 @@ void Robot::RobotInit() {
  */
 void Robot::RobotPeriodic() {
   //TODO: Add Swerve Drive https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html
+  swerve.readEncoders();
+  swerve.refreshPID();
 }
 
 /**
@@ -59,7 +61,9 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {}
 
-void Robot::TeleopPeriodic() {}
+void Robot::TeleopPeriodic() {
+    swerve.robotRelativeDrive();
+}
 
 void Robot::DisabledInit() {}
 
@@ -67,7 +71,9 @@ void Robot::DisabledPeriodic() {}
 
 void Robot::TestInit() {}
 
-void Robot::TestPeriodic() {}
+void Robot::TestPeriodic() {
+  swerve.calibPID();
+}
 
 void Robot::SimulationInit() {}
 

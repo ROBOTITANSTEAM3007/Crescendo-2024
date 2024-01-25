@@ -9,6 +9,8 @@
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
 #include <frc/kinematics/SwerveDriveKinematics.h> // Added!
+#include <Defines.h>
+#include <Swerve.h>
 //https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html
 
 class Robot : public frc::TimedRobot {
@@ -25,6 +27,9 @@ class Robot : public frc::TimedRobot {
   void TestPeriodic() override;
   void SimulationInit() override;
   void SimulationPeriodic() override;
+
+
+  swerveDrive swerve;
 
  private:
   frc::SendableChooser<std::string> m_chooser;

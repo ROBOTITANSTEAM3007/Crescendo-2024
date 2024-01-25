@@ -21,3 +21,8 @@
 #define frontLeftOffset 114.4335
 #define backRightOffset -110.7422
 #define backLeftOffset 173.6718
+
+#define frontLeftAngleToCenter 51.232442405
+#define frontRightAngleToCenter 308.767557595
+#define backLeftAngleToCenter 128.767557595
+#define backRightAngleToCenter 231.232442405
