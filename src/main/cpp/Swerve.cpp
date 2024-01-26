@@ -234,8 +234,42 @@ double swerveWheel::closestAngle(double a, double b){
 
     //Convert from -360 to 360 to -180 to 180
     if (fabs(m_bestTargetAngle) > 180) {
-        //sin returns a 1 for any value over 1 degree and a -1 for any value under 1 degree
+        //sin returns a 1 for any value over 1 degree and a -1 for any value under -1 degree
+
+        double poleDifference = (180 - fabs(std::fmod(a, 360))) + (180 - fabs(std::fmod(b, 360)));
+        double bestPoledAngle = 999;
+
+        if(poleDifference < 90) {
+
+
+                int polePolarity;
+                double positivePoledA = a+poleDifference;
+                double negativePoledA = a-poleDifference;
+
+                if(positivePoledA > 180){
+                        positivePoledA -= 360;
+                }
+                if(negativePoledA < -180) {
+                        negativePoledA += 360;
+                }
+
+                if(positivePoledA == b) {
+                        polePolarity = -1;
+                } else if(negativePoledA == b) {
+                        polePolarity = 1;
+                }
+
+                bestPoledAngle = poleDifference * polePolarity;
+
+        }
         m_bestTargetAngle = -(sin(m_bestTargetAngle) * 360) + m_bestTargetAngle;
+
+
+        if(fabs(bestPoledAngle) < fabs(m_bestTargetAngle)) {
+                m_bestTargetAngle = bestPoledAngle;
+        }
+
+
     }
     return(m_bestTargetAngle);
 }

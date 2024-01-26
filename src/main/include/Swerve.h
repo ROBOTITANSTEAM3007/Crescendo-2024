@@ -27,7 +27,7 @@ class swerveWheel{
         //Tells motors to not turn
         void chill();
 
-        //Get closest angle between two angles
+        //Get closest angle between two angles a is current angle and b is target angle
         double closestAngle(double a, double b);
 
         std::string m_wheelName;
@@ -38,6 +38,7 @@ class swerveWheel{
 
         bool inverted = 0;
 
+        //Encoder pointer
         ctre::phoenix6::hardware::CANcoder* encoder;
 
         double m_turnAngle;
@@ -50,8 +51,10 @@ class swerveWheel{
         short rotationCAN;
         short encoderCAN;
 
+        //PID initializing
         frc::PIDController m_directionController{0,0,0};
 
+        //Instantiate the motors for each wheel
         rev::CANSparkMax* m_driveMotor;
         rev::CANSparkMax* m_rotationMotor;
 
@@ -140,11 +143,15 @@ class swerveDrive  {
         double m_stickX;
         double m_stickTwist;
 
+        //Angle in Radians
         double m_angleR;
+        //Angle in Degrees
         double m_angleD;
 
+        //How fast we are to move
         double m_magnitude;
 
+        //How much to turn, between -45 and 45 degrees
         double m_twistAngle;
 
 
