@@ -2,7 +2,7 @@
 
 #pragma once
 #include "Defines.h"
-#include <rev/CANSparkMax.h>
+
 
 
 
@@ -112,22 +112,22 @@ class swerveDrive  {
 
     private:
         //Can IDs for CANSparkMax must be variable not definitions due to a compiler issue
-        const short frontLeftDriveMotorID = 1;
-        const short frontRightDriveMotorID = 3;
+        const short frontLeftDriveMotorID = 8;
+        const short frontRightDriveMotorID = 1;
         const short backLeftDriveMotorID = 6;
-        const short backRightDriveMotorID = 8;
+        const short backRightDriveMotorID = 3;
 
         //Rotation motor CAN IDs
-        const short frontLeftRotationMotorID = 2;
-        const short frontRightRotationMotorID = 4;
-        const short backLeftRotationMotorID = 7;
-        const short backRightRotationMotorID = 5;
+        const short frontLeftRotationMotorID = 7;
+        const short frontRightRotationMotorID = 2;
+        const short backLeftRotationMotorID = 5;
+        const short backRightRotationMotorID = 4;
 
         //CANCoder CAN IDs
-        const short frontLeftRotationEncoderID = 12;
-        const short frontRightRotationEncoderID = 11;
-        const short backLeftRotationEncoderID = 9;
-        const short backRightRotationEncoderID = 10;
+        const short frontLeftRotationEncoderID = 9;
+        const short frontRightRotationEncoderID = 12;
+        const short backLeftRotationEncoderID = 10;
+        const short backRightRotationEncoderID = 11;
 
         frc::Joystick driveStick{0};
 
@@ -158,8 +158,8 @@ class swerveDrive  {
 
         double m_calibAngle = 0;
 
-        double m_p = 0.015;
-        double m_i = 0.001;
+        double m_p = 0.005;
+        double m_i = 0;
         double m_d = 0;
 
 

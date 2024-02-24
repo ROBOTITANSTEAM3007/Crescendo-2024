@@ -8,21 +8,35 @@
 #include <cmath>
 #include <units/angle.h>
 #include <math.h>
+#include <thread>
 
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc/Joystick.h>
 #include <wpimath/MathShared.h> 
+#include <frc/PneumaticHub.h>
+#include <frc/Solenoid.h>
+#include <frc/DutyCycleEncoder.h>
+#include <frc/Compressor.h>
+#include <frc/motorcontrol/Spark.h>
+#include <frc/DigitalInput.h>
+#include <rev/CANSparkMax.h>
 
-#define encoderTolerance 0.01
+#define encoderTolerance 2.5
 
-#define frontRightOffset 107.8417
-#define frontLeftOffset 114.4335
-#define backRightOffset -110.7422
-#define backLeftOffset 173.6718
+#define frontRightOffset 24.9609375
+#define frontLeftOffset 153.193359375
+#define backRightOffset 198.720703125
+#define backLeftOffset 159.345703125
 
 #define frontLeftAngleToCenter 51.232442405
 #define frontRightAngleToCenter 308.767557595
 #define backLeftAngleToCenter 128.767557595
 #define backRightAngleToCenter 231.232442405
+
+#define armEncoderChannel 10
+#define armEncoderLowerBound 0.0615
+#define armEncoderUpperBound 0.2009
+
+#define armEncoderTolerance 0.05

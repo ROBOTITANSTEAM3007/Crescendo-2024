@@ -8,9 +8,11 @@
 
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
-#include <frc/kinematics/SwerveDriveKinematics.h> // Added!
 #include <Defines.h>
+#include <Shooter.h>
 #include <Swerve.h>
+
+
 //https://docs.wpilib.org/en/stable/docs/software/kinematics-and-odometry/swerve-drive-kinematics.html
 
 class Robot : public frc::TimedRobot {
@@ -28,8 +30,19 @@ class Robot : public frc::TimedRobot {
   void SimulationInit() override;
   void SimulationPeriodic() override;
 
+  frc::Spark leftClimbMotor{0};
+  frc::Spark rightClimbMotor{1};
+
+  frc::Joystick controlStick{1};
 
   swerveDrive swerve;
+
+  frc::Solenoid rightLock{frc::PneumaticsModuleType::REVPH, 4};
+  frc::Solenoid leftLock{frc::PneumaticsModuleType::REVPH, 5};
+
+  frc::Compressor m_compressor{15, frc::PneumaticsModuleType::REVPH};
+
+  shooter shootObj{&controlStick};
 
  private:
   frc::SendableChooser<std::string> m_chooser;
