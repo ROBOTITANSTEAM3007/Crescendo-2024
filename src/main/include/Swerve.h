@@ -65,6 +65,8 @@ class swerveWheel{
         double m_setPointAngle;
         double m_setPointAngleFlipped;
 
+        frc::SlewRateLimiter<units::scalar> speedLimiter{3 / 1_s};
+
 
 
 

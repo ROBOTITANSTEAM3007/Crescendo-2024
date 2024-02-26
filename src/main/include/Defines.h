@@ -21,7 +21,9 @@
 #include <frc/Compressor.h>
 #include <frc/motorcontrol/Spark.h>
 #include <frc/DigitalInput.h>
+#include <frc/filter/SlewRateLimiter.h>
 #include <rev/CANSparkMax.h>
+#include <frc/MathUtil.h>
 
 #define encoderTolerance 2.5
 

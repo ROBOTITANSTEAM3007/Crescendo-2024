@@ -44,6 +44,8 @@ class Robot : public frc::TimedRobot {
 
   shooter shootObj{&controlStick};
 
+  
+
  private:
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";

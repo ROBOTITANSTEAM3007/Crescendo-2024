@@ -137,10 +137,10 @@ void swerveDrive::robotRelativeDrive(){
         calculateTurn();
 
         //Tell motors which way to drive
-        frontLeft.setDrive(m_magnitude);
-        frontRight.setDrive(-m_magnitude);
-        backLeft.setDrive(m_magnitude);
-        backRight.setDrive(-m_magnitude);
+        frontLeft.setDrive(-m_magnitude);
+        frontRight.setDrive(m_magnitude);
+        backLeft.setDrive(-m_magnitude);
+        backRight.setDrive(m_magnitude);
     } else if(fabs(m_stickTwist) >= 0.2) {
         inPlaceTurn();
     } else {
@@ -163,9 +163,9 @@ void swerveDrive::inPlaceTurn() {
     backLeft.setRotation(45);
 
     frontRight.setDrive(m_magnitude);
-    frontLeft.setDrive(m_magnitude);
+    frontLeft.setDrive(-m_magnitude);
     backRight.setDrive(m_magnitude);
-    backLeft.setDrive(m_magnitude);
+    backLeft.setDrive(-m_magnitude);
 }
 
 
@@ -181,7 +181,7 @@ void swerveDrive::calculateTurn(){
         frontLeft.setRotation(m_angleD - m_twistAngle);
     }
     //If the front right wheel is in the front
-    if(frontRight.closestAngle(m_angleD, frontRightAngleToCenter) >= 90) {
+    if(frontRight.closestAngle(m_angleD, frontRightAngleToCenter) <= 90) {
         frontRight.setRotation(m_angleD + m_twistAngle);
     }
     //If it's in the back 
@@ -189,7 +189,7 @@ void swerveDrive::calculateTurn(){
         frontRight.setRotation(m_angleD - m_twistAngle);
     }
     //If the left back wheel is in the front
-    if(backLeft.closestAngle(m_angleD, backLeftAngleToCenter) <= 90) {
+    if(backLeft.closestAngle(m_angleD, backLeftAngleToCenter) >= 90) {
         backLeft.setRotation(m_angleD + m_twistAngle);
     }
     //If it's in the back 
@@ -220,36 +220,42 @@ void swerveWheel::setDrive(double driveMag){
 
     frc::SmartDashboard::PutBoolean("Polarity", m_polarity);
     if(m_polarity) {
-        m_driveMotor->Set(std::clamp(-driveMag, -1.0, 1.0));
+        m_driveMotor->Set(speedLimiter.Calculate(std::clamp(-driveMag, -1.0, 1.0)));
     } else {
-        m_driveMotor->Set(std::clamp(driveMag, -1.0, 1.0 ));
+        m_driveMotor->Set(speedLimiter.Calculate(std::clamp(driveMag, -1.0, 1.0)) );
     }
 }
 
 
 double swerveWheel::closestAngle(double a, double b){
 
+
     //Get Direction
     double m_bestTargetAngle = std::fmod(a, 360) - std::fmod(b, 360);
 
-	if(fabs(m_bestTargetAngle) > 270) {
-		if(m_bestTargetAngle > 0) {
-			m_bestTargetAngle -= 360;
-		} else {
-			m_bestTargetAngle += 360;
-		}
-	}
+	
 
     if (fabs(m_bestTargetAngle) > 180) {
-        std::cout << "Inverting angle\n";
-        m_polarity = 0;
+        
 		if(m_bestTargetAngle > 0) {
         	m_bestTargetAngle = -(360) + m_bestTargetAngle;
 		} else {
 			m_bestTargetAngle = 360 + m_bestTargetAngle;
 		}
-    } else {
-		std::cout << "keeping original angle";
+    } 
+    
+    
+    
+    if(fabs(m_bestTargetAngle) > 90) {
+        //std::cout << "Inverting angle\n";
+        m_polarity = 0;
+        if(m_bestTargetAngle > 0) {
+            m_bestTargetAngle -= 180;
+        } else {
+            m_bestTargetAngle += 180;
+        }
+     }else {
+		//std::cout << "keeping original angle";
         m_polarity = 1;
     }
 
@@ -277,6 +283,7 @@ void swerveWheel::setRotation(double targetAngle) {
         //m_setPointAngleFlipped = closestAngle(currentAngle, targetAngle + 180);
 
         //if(m_setPointAngle < m_setPointAngleFlipped){
+            
             m_rotationMotor->Set(std::clamp(m_directionController.Calculate(currentAngle, currentAngle + m_setPointAngle),-0.2, 0.2));
             frc::SmartDashboard::PutNumber("Target Angle For Wheel: " + m_wheelName, m_setPointAngle + currentAngle);
         /*} else {
