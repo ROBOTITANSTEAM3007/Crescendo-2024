@@ -10,6 +10,7 @@
 #include <math.h>
 #include <thread>
 
+#include <frc/ADIS16470_IMU.h>
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
 #include <frc/smartdashboard/SmartDashboard.h>
@@ -29,8 +30,8 @@
 
 #define frontRightOffset 24.9609375
 #define frontLeftOffset 153.193359375
-#define backRightOffset 198.720703125
-#define backLeftOffset 159.345703125
+#define backRightOffset 17.31445
+#define backLeftOffset 158.7304875
 
 #define frontLeftAngleToCenter 51.232442405
 #define frontRightAngleToCenter 308.767557595

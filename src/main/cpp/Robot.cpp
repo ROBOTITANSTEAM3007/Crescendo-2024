@@ -63,8 +63,21 @@ void Robot::AutonomousPeriodic() {
 void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
-    swerve.robotRelativeDrive();
-    
+
+    if(driveStick.GetRawButton(3)) {
+        if(driveStick.GetRawButtonPressed(1)) {
+          rightLock.Set(!rightLock.Get());
+          leftLock.Set(!leftLock.Get());
+        }
+      rightClimbMotor.Set(driveStick.GetY() * -0.25);
+      leftClimbMotor.Set(driveStick.GetY() * 0.25);
+      
+    }else {
+      rightClimbMotor.Set(0);
+      leftClimbMotor.Set(0);
+
+      swerve.robotRelativeDrive();
+    }
 
 }
 
@@ -75,6 +88,7 @@ void Robot::DisabledPeriodic() {}
 void Robot::TestInit() {}
 
 void Robot::TestPeriodic() {
+  swerve.calibPID();
   
 }
 

@@ -3,7 +3,7 @@
 
 
 
-swerveDrive::swerveDrive(){
+swerveDrive::swerveDrive(frc::Joystick *joy){
 
     m_motorChoice.SetDefaultOption(k_frontLeftChoice, k_frontLeftChoice);
     m_motorChoice.AddOption(k_frontRightChoice, k_frontRightChoice);
@@ -21,6 +21,10 @@ swerveDrive::swerveDrive(){
     backRight.m_angleOffset = backRightOffset;
     backLeft.m_angleOffset = backLeftOffset;
 
+    driveStick = joy;
+
+
+
 
 
     frc::SmartDashboard::PutNumber("P", m_p);
@@ -33,6 +37,8 @@ swerveDrive::swerveDrive(){
     frc::SmartDashboard::PutNumber("Back Left P Offset", m_backLeftPOffset);
     frc::SmartDashboard::PutNumber("Back Right P Offset", m_backRightPOffset);
 
+
+
 }
 
 void swerveDrive::readEncoders() {
@@ -40,6 +46,13 @@ void swerveDrive::readEncoders() {
     frc::SmartDashboard::PutNumber("FrontRightRot", frontRight.encoder->GetAbsolutePosition().GetValueAsDouble()*360 - frontRightOffset);
     frc::SmartDashboard::PutNumber("backLeftRot", backLeft.encoder->GetAbsolutePosition().GetValueAsDouble()*360 - backLeftOffset);
     frc::SmartDashboard::PutNumber("backRightRot", backRight.encoder->GetAbsolutePosition().GetValueAsDouble()*360 - backRightOffset);
+
+
+    frc::SmartDashboard::PutBoolean("Front Left Motor Polarity", frontLeft.m_polarity);
+    frc::SmartDashboard::PutBoolean("Front Right Motor Polarity", frontRight.m_polarity);
+    frc::SmartDashboard::PutBoolean("Back Left Motor Polarity", backLeft.m_polarity);
+    frc::SmartDashboard::PutBoolean("Back Right Motor Polarity", backRight.m_polarity);
+
 
 
 };
@@ -56,21 +69,37 @@ void swerveDrive::calibPID(){
     if(m_selectedMotor == k_frontLeftChoice){
         m_frontLeftPOffset = frc::SmartDashboard::GetNumber("Front Left P Offset", m_frontLeftPOffset);
         frontLeft.setRotation(m_calibAngle + m_frontLeftPOffset);
-
+        frontLeft.setDrive(0.2);
+        frontRight.chill();
+        backLeft.chill();
+        backRight.chill();
         
     } else if(m_selectedMotor == k_frontRightChoice) {
         m_frontRightPOffset = frc::SmartDashboard::GetNumber("Front Right P Offset", m_frontRightPOffset);
 
         frontRight.setRotation(m_calibAngle);
+        frontRight.setDrive(0.2);
+        frontLeft.chill();
+        backLeft.chill();
+        backRight.chill();
 
     } else if(m_selectedMotor == k_backLeftChoice) {
         m_backLeftPOffset = frc::SmartDashboard::GetNumber("Back Left P Offset", m_backLeftPOffset);
 
         backLeft.setRotation(m_calibAngle);
+        backLeft.setDrive(0.2);
+
+        frontLeft.chill();
+        frontRight.chill();
+        backRight.chill();
 
     } else if(m_selectedMotor == k_backRightChoice) {
         m_backRightPOffset = frc::SmartDashboard::GetNumber("Back Right P Offset", m_backRightPOffset);
         backRight.setRotation(m_calibAngle);
+        backRight.setDrive(0.2);
+        frontLeft.chill();
+        backLeft.chill();
+        frontRight.chill();
 
     } else {
 
@@ -111,9 +140,9 @@ rotation function: atan*/
 void swerveDrive::robotRelativeDrive(){
 
     
-    m_stickY = driveStick.GetY();
-    m_stickX = driveStick.GetX();
-    m_stickTwist = -driveStick.GetTwist();
+    m_stickY = driveStick->GetY();
+    m_stickX = driveStick->GetX();
+    m_stickTwist = driveStick->GetTwist();
 
     double m_magnitude = std::sqrt(std::pow(fabs(m_stickY), 2) + std::pow(fabs(m_stickX), 2)); //Pythagorean theorem
 	if(m_magnitude > 0.2) {
@@ -141,7 +170,7 @@ void swerveDrive::robotRelativeDrive(){
         frontRight.setDrive(m_magnitude);
         backLeft.setDrive(-m_magnitude);
         backRight.setDrive(m_magnitude);
-    } else if(fabs(m_stickTwist) >= 0.2) {
+    } else if(fabs(m_stickTwist) >= 0.6) {
         inPlaceTurn();
     } else {
         frontLeft.chill();
@@ -155,7 +184,7 @@ void swerveDrive::robotRelativeDrive(){
 }
 
 void swerveDrive::inPlaceTurn() {
-    m_magnitude = m_stickTwist;
+    m_magnitude = m_stickTwist * 0.3;
 
     frontRight.setRotation(225);
     frontLeft.setRotation(-45);
@@ -170,10 +199,10 @@ void swerveDrive::inPlaceTurn() {
 
 
 void swerveDrive::calculateTurn(){
-    m_twistAngle = -m_stickTwist * 45;
+    m_twistAngle = m_stickTwist * 45;
 
     //If the front left wheel is in the front
-    if(frontLeft.closestAngle(m_angleD, frontLeftAngleToCenter) <= 90) {
+    if(frontLeft.closestAngle(m_angleD, frontLeftAngleToCenter) >= 90) {
         frontLeft.setRotation(m_angleD + m_twistAngle);
     }
     //If it's in the back 
@@ -181,7 +210,7 @@ void swerveDrive::calculateTurn(){
         frontLeft.setRotation(m_angleD - m_twistAngle);
     }
     //If the front right wheel is in the front
-    if(frontRight.closestAngle(m_angleD, frontRightAngleToCenter) <= 90) {
+    if(frontRight.closestAngle(m_angleD, frontRightAngleToCenter) >= 90) {
         frontRight.setRotation(m_angleD + m_twistAngle);
     }
     //If it's in the back 
@@ -189,7 +218,7 @@ void swerveDrive::calculateTurn(){
         frontRight.setRotation(m_angleD - m_twistAngle);
     }
     //If the left back wheel is in the front
-    if(backLeft.closestAngle(m_angleD, backLeftAngleToCenter) >= 90) {
+    if(backLeft.closestAngle(m_angleD, backLeftAngleToCenter) <= 90) {
         backLeft.setRotation(m_angleD + m_twistAngle);
     }
     //If it's in the back 
@@ -197,7 +226,7 @@ void swerveDrive::calculateTurn(){
         backLeft.setRotation(m_angleD - m_twistAngle);
     }
     //If the back left wheel is in the front
-    if(backRight.closestAngle(m_angleD, backRightAngleToCenter) >= 90) {
+    if(backRight.closestAngle(m_angleD, backRightAngleToCenter) <= 90) {
         backRight.setRotation(m_angleD + m_twistAngle);
     }
     //If it's in the back 

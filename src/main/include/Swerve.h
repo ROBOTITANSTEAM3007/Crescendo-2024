@@ -43,7 +43,7 @@ class swerveWheel{
 
         double m_turnAngle;
 
-
+        bool m_polarity = 0;
 
     private:
 
@@ -77,7 +77,7 @@ class swerveWheel{
 
 
 
-        bool m_polarity = 0;
+
 
         double angleOffset;
 
@@ -98,7 +98,7 @@ class swerveDrive  {
 
         void refreshPID();
 
-        swerveDrive();
+        swerveDrive(frc::Joystick *joy);
 
         //Point wheels at zero
         void findZeros();
@@ -131,7 +131,7 @@ class swerveDrive  {
         const short backLeftRotationEncoderID = 10;
         const short backRightRotationEncoderID = 11;
 
-        frc::Joystick driveStick{0};
+        frc::Joystick *driveStick;
 
         frc::SendableChooser<std::string> m_motorChoice;
         const std::string k_frontLeftChoice = "Front Left Motor";

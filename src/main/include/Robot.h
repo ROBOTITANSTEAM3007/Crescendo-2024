@@ -30,21 +30,23 @@ class Robot : public frc::TimedRobot {
   void SimulationInit() override;
   void SimulationPeriodic() override;
 
-  frc::Spark leftClimbMotor{0};
-  frc::Spark rightClimbMotor{1};
+  frc::Spark leftClimbMotor{15};
+  frc::Spark rightClimbMotor{14};
 
   frc::Joystick controlStick{1};
+  frc::Joystick driveStick{0};
 
-  swerveDrive swerve;
+  swerveDrive swerve{&driveStick};
 
-  frc::Solenoid rightLock{frc::PneumaticsModuleType::REVPH, 4};
-  frc::Solenoid leftLock{frc::PneumaticsModuleType::REVPH, 5};
+  frc::Solenoid rightLock{15, frc::PneumaticsModuleType::REVPH, 5};
+  frc::Solenoid leftLock{15, frc::PneumaticsModuleType::REVPH, 7};
+
 
   frc::Compressor m_compressor{15, frc::PneumaticsModuleType::REVPH};
 
   shooter shootObj{&controlStick};
 
-  
+ 
 
  private:
   frc::SendableChooser<std::string> m_chooser;
