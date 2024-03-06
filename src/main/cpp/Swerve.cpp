@@ -32,11 +32,6 @@ swerveDrive::swerveDrive(frc::Joystick *joy){
     frc::SmartDashboard::PutNumber("D", m_d);
 
     frc::SmartDashboard::PutNumber("Calib Angle", m_calibAngle);
-    frc::SmartDashboard::PutNumber("Front Left P Offset", m_frontLeftPOffset);
-    frc::SmartDashboard::PutNumber("Front Right P Offset", m_frontRightPOffset);
-    frc::SmartDashboard::PutNumber("Back Left P Offset", m_backLeftPOffset);
-    frc::SmartDashboard::PutNumber("Back Right P Offset", m_backRightPOffset);
-
 
 
 }
@@ -140,8 +135,8 @@ rotation function: atan*/
 void swerveDrive::robotRelativeDrive(){
 
     
-    m_stickY = driveStick->GetY();
-    m_stickX = driveStick->GetX();
+    m_stickY = -driveStick->GetY();
+    m_stickX = -driveStick->GetX();
     m_stickTwist = driveStick->GetTwist();
 
     double m_magnitude = std::sqrt(std::pow(fabs(m_stickY), 2) + std::pow(fabs(m_stickX), 2)); //Pythagorean theorem
@@ -162,6 +157,7 @@ void swerveDrive::robotRelativeDrive(){
 		} else if(m_stickX < 0){
 		    m_angleD = m_angleD + 360;
 		}
+        frc::SmartDashboard::PutNumber("Joystick Angle",m_angleD);
         //Target angles for all four wheels
         calculateTurn();
 
@@ -169,7 +165,7 @@ void swerveDrive::robotRelativeDrive(){
         frontLeft.setDrive(-m_magnitude);
         frontRight.setDrive(m_magnitude);
         backLeft.setDrive(-m_magnitude);
-        backRight.setDrive(m_magnitude);
+        backRight.setDrive(-m_magnitude);
     } else if(fabs(m_stickTwist) >= 0.6) {
         inPlaceTurn();
     } else {
@@ -193,7 +189,7 @@ void swerveDrive::inPlaceTurn() {
 
     frontRight.setDrive(m_magnitude);
     frontLeft.setDrive(-m_magnitude);
-    backRight.setDrive(m_magnitude);
+    backRight.setDrive(-m_magnitude);
     backLeft.setDrive(-m_magnitude);
 }
 
@@ -303,7 +299,7 @@ void swerveWheel::setRotation(double targetAngle) {
         targetAngle -= 360;
     }
 
-    if(fabs(currentAngle - targetAngle) > encoderTolerance) {
+    //if(fabs(currentAngle - targetAngle) > encoderTolerance) {
 
         
         //Get Closest angle to setPoint
@@ -323,9 +319,9 @@ void swerveWheel::setRotation(double targetAngle) {
 
         
         
-    } else {
-        m_rotationMotor->Set(0);
-    }
+    //} else {
+      //  m_rotationMotor->Set(0);
+    //}
     
    
 }
