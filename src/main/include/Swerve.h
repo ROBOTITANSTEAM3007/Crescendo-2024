@@ -91,10 +91,14 @@ class swerveWheel{
 class swerveDrive  {
 
     public:
+
+        frc::ADIS16470_IMU imu;
         //Read Encoders to smartdashboard
         void readEncoders();
 
         void robotRelativeDrive();
+
+        void fieldCentricDrive();
 
         void refreshPID();
 
@@ -109,6 +113,8 @@ class swerveDrive  {
         void calculateTurn();
 
         void inPlaceTurn();
+
+        void calibGyro(double SetAngle);
 
 
 

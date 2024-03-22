@@ -132,16 +132,15 @@ void swerveDrive::refreshPID(){
 /*
 rotation function: atan*/
 
-void swerveDrive::robotRelativeDrive(){
+void swerveDrive::fieldCentricDrive() {
 
-    
     m_stickY = -driveStick->GetY();
     m_stickX = -driveStick->GetX();
     m_stickTwist = driveStick->GetTwist();
 
     double m_magnitude = std::sqrt(std::pow(fabs(m_stickY), 2) + std::pow(fabs(m_stickX), 2)); //Pythagorean theorem
 	if(m_magnitude > 0.2) {
-
+        m_magnitude = (m_magnitude - 0.2) * 1.25;
 		//Control for an undefined slope
 		if(m_stickY != 0) {
 
@@ -158,6 +157,8 @@ void swerveDrive::robotRelativeDrive(){
 		    m_angleD = m_angleD + 360;
 		}
         frc::SmartDashboard::PutNumber("Joystick Angle",m_angleD);
+
+        m_angleD -= (double)imu.GetAngle(imu.kYaw);
         //Target angles for all four wheels
         calculateTurn();
 
@@ -177,6 +178,10 @@ void swerveDrive::robotRelativeDrive(){
     }
     
 
+}
+
+void swerveDrive::calibGyro(double setAngle) {
+    imu.SetGyroAngle(imu.kYaw, (units::degree_t)setAngle);
 }
 
 void swerveDrive::inPlaceTurn() {
@@ -230,6 +235,56 @@ void swerveDrive::calculateTurn(){
         backRight.setRotation(m_angleD - m_twistAngle);
     }
 }
+
+void swerveDrive::robotRelativeDrive(){
+
+    
+    m_stickY = -driveStick->GetY();
+    m_stickX = -driveStick->GetX();
+    m_stickTwist = driveStick->GetTwist();
+
+    double m_magnitude = std::sqrt(std::pow(fabs(m_stickY), 2) + std::pow(fabs(m_stickX), 2)); //Pythagorean theorem
+	if(m_magnitude > 0.2) {
+        m_magnitude = (m_magnitude - 0.2) * 1.25;
+
+		//Control for an undefined slope
+		if(m_stickY != 0) {
+
+			m_angleR = atan(m_stickX/m_stickY);  //Should be between 90 and -90 degrees
+			m_angleD = (m_angleR * 57.2958);
+		} else if(m_stickX > 0) {
+			m_angleD = 90;
+		} else {
+			m_angleD = -90;
+		}
+		if(m_stickY < 0) {
+    		m_angleD = 180 + m_angleD;
+		} else if(m_stickX < 0){
+		    m_angleD = m_angleD + 360;
+		}
+        frc::SmartDashboard::PutNumber("Joystick Angle",m_angleD);
+        //Target angles for all four wheels
+        calculateTurn();
+
+        //Tell motors which way to drive
+        frontLeft.setDrive(-m_magnitude);
+        frontRight.setDrive(m_magnitude);
+        backLeft.setDrive(-m_magnitude);
+        backRight.setDrive(-m_magnitude);
+    } else if(fabs(m_stickTwist) >= 0.6) {
+        inPlaceTurn();
+    } else {
+        frontLeft.chill();
+        frontRight.chill();
+        backLeft.chill();
+        backRight.chill();
+
+    }
+    
+
+}
+
+
 
 void swerveWheel::chill() {
     this->m_driveMotor->Set(0);
@@ -309,7 +364,7 @@ void swerveWheel::setRotation(double targetAngle) {
 
         //if(m_setPointAngle < m_setPointAngleFlipped){
             
-            m_rotationMotor->Set(std::clamp(m_directionController.Calculate(currentAngle, currentAngle + m_setPointAngle),-0.2, 0.2));
+            m_rotationMotor->Set(std::clamp(m_directionController.Calculate(currentAngle, currentAngle + m_setPointAngle),-0.5, 0.5));
             frc::SmartDashboard::PutNumber("Target Angle For Wheel: " + m_wheelName, m_setPointAngle + currentAngle);
         /*} else {
             m_rotationMotor->Set(std::clamp(m_directionController.Calculate(currentAngle, currentAngle + m_setPointAngleFlipped),-0.2, 0.2));

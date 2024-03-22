@@ -46,6 +46,8 @@ class Robot : public frc::TimedRobot {
 
   shooter shootObj{&controlStick};
 
+
+  bool climbDebounce = false;
  
 
  private:

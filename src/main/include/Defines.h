@@ -39,7 +39,9 @@
 #define backRightAngleToCenter 231.232442405
 
 #define armEncoderChannel 10
-#define armEncoderLowerBound 0.0615
+#define armEncoderLowerBound 0.004
+#define armEncoderAmpPos 0.008 // encoder values
+#define shootingAngle 0.165
 #define armEncoderUpperBound 0.2009
 
 #define armEncoderTolerance 0.05

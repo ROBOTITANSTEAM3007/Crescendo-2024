@@ -49,6 +49,7 @@ void Robot::AutonomousInit() {
     // Custom Auto goes here
   } else {
     // Default Auto goes here
+    swerve.calibGyro(0);
   }
 }
 
@@ -64,20 +65,38 @@ void Robot::TeleopInit() {}
 
 void Robot::TeleopPeriodic() {
 
-    if(driveStick.GetRawButton(3)) {
-        if(driveStick.GetRawButtonPressed(1)) {
-          rightLock.Set(!rightLock.Get());
-          leftLock.Set(!leftLock.Get());
+        if(driveStick.GetRawButton(2)) {
+          rightLock.Set(1);
+          rightClimbMotor.Set(0.5);
+          leftClimbMotor.Set(-0.5);
+          leftLock.Set(1);
+        } 
+        else {
+          leftLock.Set(0);
+          rightLock.Set(0);
+          leftClimbMotor.Set(0);
+          rightClimbMotor.Set(0);
         }
-      rightClimbMotor.Set(driveStick.GetY() * -0.25);
-      leftClimbMotor.Set(driveStick.GetY() * 0.25);
+        if(driveStick.GetRawButton(3)) {
+          leftClimbMotor.Set(0.5);
+          leftLock.Set(0);
+        } if(driveStick.GetRawButton(4)) {
+          rightClimbMotor.Set(-0.5);
+          rightLock.Set(0);
+        } 
+      if(driveStick.GetRawButton(11)) {
+        swerve.calibGyro(0);
+      }
+      if(driveStick.GetRawButton(12)) {
+        swerve.calibGyro(90);
+      }
       
-    }else {
-      rightClimbMotor.Set(0);
-      leftClimbMotor.Set(0);
 
-      swerve.robotRelativeDrive();
-    }
+
+
+      swerve.fieldCentricDrive();
+
+    
 
 }
 
