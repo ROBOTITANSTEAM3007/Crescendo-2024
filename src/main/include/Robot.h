@@ -48,11 +48,23 @@ class Robot : public frc::TimedRobot {
 
 
   bool climbDebounce = false;
+
+  void ampAuto();
+  void shootAuto();
+  void driveZeroAuto();
+  void driveNinetyAuto();
  
 
  private:
   frc::SendableChooser<std::string> m_chooser;
   const std::string kAutoNameDefault = "Default";
-  const std::string kAutoNameCustom = "My Auto";
+  const std::string kAmpAuto = "Amp auto";
+  const std::string kShootAuto = "Shoot auto";
+  const std::string kDriveZeroAuto = "Drive from zero";
+  const std::string kDriveNinetyAuto = "Drive from ninety";
+
   std::string m_autoSelected;
+
+  bool autoStepOne = true;
+  
 };

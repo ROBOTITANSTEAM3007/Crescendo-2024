@@ -5,7 +5,8 @@
 
 
 
-
+#define driveGearRatioMultiplier 8.14
+#define wheelCircumfrence 12.566370614
 
 
 
@@ -27,8 +28,12 @@ class swerveWheel{
         //Tells motors to not turn
         void chill();
 
+
+
         //Get closest angle between two angles a is current angle and b is target angle
         double closestAngle(double a, double b);
+
+        double getEncoder();
 
         std::string m_wheelName;
 
@@ -54,12 +59,15 @@ class swerveWheel{
         //PID initializing
         frc::PIDController m_directionController{0,0,0};
 
+       
+
+
         //Instantiate the motors for each wheel
         rev::CANSparkMax* m_driveMotor;
         rev::CANSparkMax* m_rotationMotor;
 
 
-
+        rev::SparkRelativeEncoder *rel;
 
         double m_bestTargetAngle;
         double m_setPointAngle;
@@ -116,6 +124,11 @@ class swerveDrive  {
 
         void calibGyro(double SetAngle);
 
+        void driveFor(double distance);
+
+        //For use in calculate un function
+        double turnClosest(double a, double b);
+
 
 
     private:
@@ -137,6 +150,8 @@ class swerveDrive  {
         const short backLeftRotationEncoderID = 10;
         const short backRightRotationEncoderID = 11;
 
+        double rotations = 0;
+
         frc::Joystick *driveStick;
 
         frc::SendableChooser<std::string> m_motorChoice;
@@ -145,6 +160,8 @@ class swerveDrive  {
         const std::string k_backLeftChoice = "Back Left Motor";
         const std::string k_backRightChoice = "Back Right Motor";
         std::string m_selectedMotor;
+
+        double lastEncPos = 0;
 
 
         double m_stickY;

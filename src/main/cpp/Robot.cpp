@@ -8,8 +8,10 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 void Robot::RobotInit() {
-  m_chooser.SetDefaultOption(kAutoNameDefault, kAutoNameDefault);
-  m_chooser.AddOption(kAutoNameCustom, kAutoNameCustom);
+  m_chooser.AddOption(kAmpAuto, kAmpAuto);
+  m_chooser.AddOption(kShootAuto, kShootAuto);
+  m_chooser.AddOption(kDriveNinetyAuto, kDriveNinetyAuto);
+  m_chooser.SetDefaultOption(kDriveZeroAuto, kDriveZeroAuto);
   frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 }
 
@@ -26,6 +28,36 @@ void Robot::RobotPeriodic() {
   swerve.refreshPID();
 
   frc::SmartDashboard::PutNumber("Shooter Angle", shootObj.angle());
+}
+
+void Robot::ampAuto() {
+  if(this->autoStepOne) {
+    if(shootObj.setAngleRequest(armEncoderAmpPos)) {
+      this->autoStepOne = false;
+    }
+  } else {
+    shootObj.setAngleRequest(shootingAngle);
+    swerve.driveFor(25); //25 inches
+  }
+  
+}
+void Robot::driveNinetyAuto() {
+  swerve.driveFor(25);
+}
+void Robot::driveZeroAuto() {
+  swerve.driveFor(12);
+}
+
+
+
+void Robot::shootAuto() {
+  if(this->autoStepOne) {
+    if(shootObj.setAngleRequest(shootingAngle)) {
+      this->autoStepOne = false;
+    }
+  } else {
+    swerve.driveFor(25); //25 inches
+  }
 }
 
 /**
@@ -45,8 +77,8 @@ void Robot::AutonomousInit() {
   //     kAutoNameDefault);
   fmt::print("Auto selected: {}\n", m_autoSelected);
 
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
+  if (m_autoSelected == kAmpAuto || m_autoSelected == kDriveNinetyAuto) {
+    swerve.calibGyro(90);
   } else {
     // Default Auto goes here
     swerve.calibGyro(0);
@@ -54,10 +86,15 @@ void Robot::AutonomousInit() {
 }
 
 void Robot::AutonomousPeriodic() {
-  if (m_autoSelected == kAutoNameCustom) {
-    // Custom Auto goes here
+  if (m_autoSelected == kAmpAuto) {
+    ampAuto();
+  } else if(m_autoSelected == kShootAuto) {
+    shootAuto();
+    
+  }else if(m_autoSelected == kDriveNinetyAuto) {
+    driveNinetyAuto();
   } else {
-    // Default Auto goes here
+    driveZeroAuto();
   }
 }
 
