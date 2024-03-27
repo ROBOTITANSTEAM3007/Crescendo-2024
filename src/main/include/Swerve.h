@@ -50,6 +50,14 @@ class swerveWheel{
 
         bool m_polarity = 0;
 
+        double m_magnitude;
+
+        double F;
+
+        double S;
+
+        double m_angle;
+
     private:
 
         short driveCAN;
@@ -154,6 +162,8 @@ class swerveDrive  {
 
         frc::Joystick *driveStick;
 
+        double RtoD = 180/3.14159;
+
         frc::SendableChooser<std::string> m_motorChoice;
         const std::string k_frontLeftChoice = "Front Left Motor";
         const std::string k_frontRightChoice = "Front Right Motor";
@@ -179,7 +189,11 @@ class swerveDrive  {
         //How much to turn, between -45 and 45 degrees
         double m_twistAngle;
 
+        double fMag;
 
+        double sMag;
+
+        double magMax;
 
         double m_calibAngle = 0;
 

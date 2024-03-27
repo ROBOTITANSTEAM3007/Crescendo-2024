@@ -162,11 +162,6 @@ void swerveDrive::fieldCentricDrive() {
         //Target angles for all four wheels
         calculateTurn();
 
-        //Tell motors which way to drive
-        frontLeft.setDrive(-m_magnitude);
-        frontRight.setDrive(m_magnitude);
-        backLeft.setDrive(-m_magnitude);
-        backRight.setDrive(-m_magnitude);
     } else if(fabs(m_stickTwist) >= 0.6) {
         inPlaceTurn();
     } else {
@@ -210,40 +205,54 @@ double swerveDrive::turnClosest(double a, double b) {
 }
 
 void swerveDrive::calculateTurn(){
-    m_twistAngle = m_stickTwist * 45;
+    this->m_stickTwist *= 1;
 
-    //If the front left wheel is in the Back
-    if(fabs(turnClosest(m_angleD, frontLeftAngleToCenter)) <= 90) {
-        frontLeft.setRotation(m_angleD + m_twistAngle);
+    fMag = m_magnitude * cos(m_angleD/RtoD);
+    sMag = m_magnitude * sin(m_angleD/RtoD);
+
+    //Front left wheel
+    frontLeft.F = m_stickTwist*cos((frontLeftAngleToCenter+90)/RtoD) + fMag;
+    frontLeft.S = m_stickTwist*sin((frontLeftAngleToCenter + 90)/RtoD) + sMag;
+    frontLeft.m_magnitude = std::sqrt(std::pow(frontLeft.F, 2) + std::pow(frontLeft.S, 2))*frontLeft.F/fabs(frontLeft.F);
+    frontLeft.m_angle = atan(frontLeft.S/frontLeft.F) * RtoD;
+
+    //Front right wheel
+    frontRight.F = m_stickTwist*cos((frontRightAngleToCenter+90)/RtoD) + fMag;
+    frontRight.S = m_stickTwist*sin((frontRightAngleToCenter + 90)/RtoD) + sMag;
+    frontRight.m_magnitude = std::sqrt(std::pow(frontRight.F, 2) + std::pow(frontRight.S, 2))*frontRight.F/fabs(frontRight.F);
+    frontRight.m_angle = atan(frontRight.S/frontRight.F) * RtoD;
+
+    //Back left wheel
+    backLeft.F = m_stickTwist*cos((backLeftAngleToCenter+90)/RtoD) + fMag;
+    backLeft.S = m_stickTwist*sin((backLeftAngleToCenter + 90)/RtoD) + sMag;
+    backLeft.m_magnitude = std::sqrt(std::pow(backLeft.F, 2) + std::pow(backLeft.S, 2))*backLeft.F/fabs(backLeft.F);
+    backLeft.m_angle = atan(backLeft.S/backLeft.F) * RtoD;
+
+    //Back right wheel
+    backRight.F = m_stickTwist*cos((backRightAngleToCenter+90)/RtoD) + fMag;
+    backRight.S = m_stickTwist*sin((backRightAngleToCenter + 90)/RtoD) + sMag;
+    backRight.m_magnitude = std::sqrt(std::pow(backRight.F, 2) + std::pow(backRight.S, 2))*backRight.F/fabs(backRight.F);
+    backRight.m_angle = atan(backRight.S/backRight.F) * RtoD;
+
+    magMax=fmax(fabs(frontLeft.m_magnitude),fmax(fabs(frontRight.m_magnitude), fmax(fabs(backLeft.m_magnitude),fabs(backRight.m_magnitude))));
+    if(magMax > 1) {
+        frontLeft.m_magnitude /= magMax;
+        frontRight.m_magnitude /= magMax;
+        backLeft.m_magnitude /= magMax;
+        backRight.m_magnitude /= magMax;
     }
-    //If it's in the Front 
-    else {
-        frontLeft.setRotation(m_angleD - m_twistAngle);
-    }
-    //If the front right wheel is in the back
-    if(fabs(turnClosest(m_angleD, frontRightAngleToCenter)) > 90) {
-        frontRight.setRotation(m_angleD + m_twistAngle);
-    }
-    //If it's in the front
-    else {
-        frontRight.setRotation(m_angleD - m_twistAngle);
-    }
-    //If the left back wheel is in the front
-    if(fabs(turnClosest(m_angleD, backLeftAngleToCenter)) < 90) {
-        backLeft.setRotation(m_angleD - m_twistAngle);
-    }
-    //If it's in the back 
-    else {
-        backLeft.setRotation(m_angleD + m_twistAngle);
-    }
-    //If the back left wheel is in the front
-    if(fabs(turnClosest(m_angleD, backRightAngleToCenter)) <= 90) {
-        backRight.setRotation(m_angleD - m_twistAngle);
-    }
-    //If it's in the back 
-    else {
-        backRight.setRotation(m_angleD + m_twistAngle);
-    }
+
+    frontLeft.setRotation(frontLeft.m_angle);
+    frontLeft.setDrive(-frontLeft.m_magnitude);
+
+    frontRight.setRotation(frontRight.m_angle);
+    frontRight.setDrive(frontRight.m_magnitude);
+
+    backLeft.setRotation(backLeft.m_angle);
+    backLeft.setDrive(-backLeft.m_magnitude);
+
+    backRight.setRotation(backRight.m_angle);
+    backRight.setDrive(-backRight.m_magnitude);
 }
 
 double swerveWheel::getEncoder() {
@@ -308,11 +317,6 @@ void swerveDrive::robotRelativeDrive(){
         //Target angles for all four wheels
         calculateTurn();
 
-        //Tell motors which way to drive
-        frontLeft.setDrive(-m_magnitude);
-        frontRight.setDrive(m_magnitude);
-        backLeft.setDrive(-m_magnitude);
-        backRight.setDrive(-m_magnitude);
     } else if(fabs(m_stickTwist) >= 0.6) {
         inPlaceTurn();
     } else {
