@@ -118,6 +118,8 @@ class swerveDrive  {
 
         void refreshPID();
 
+        void testDrive();
+
         swerveDrive(frc::Joystick *joy);
 
         //Point wheels at zero

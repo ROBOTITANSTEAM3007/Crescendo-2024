@@ -117,7 +117,6 @@ void swerveDrive::refreshPID(){
     m_i = frc::SmartDashboard::GetNumber("I", m_i);
     m_d = frc::SmartDashboard::GetNumber("D", 0);
 
-    frc::SmartDashboard::PutBoolean("FUCKING WORKS", (m_p == 0.05));
 
     frontLeft.refreshPID(m_p + m_frontLeftPOffset, m_i, m_d);
     frontRight.refreshPID(m_p + m_frontRightPOffset, m_i, m_d);
@@ -136,31 +135,110 @@ void swerveDrive::fieldCentricDrive() {
 
     m_stickY = -driveStick->GetY();
     m_stickX = -driveStick->GetX();
-    m_stickTwist = driveStick->GetTwist();
+    m_stickTwist = -driveStick->GetTwist();
 
-    double m_magnitude = std::sqrt(std::pow(fabs(m_stickY), 2) + std::pow(fabs(m_stickX), 2)); //Pythagorean theorem
-	if(m_magnitude > 0.2) {
-        m_magnitude = (m_magnitude - 0.2) * 1.25;
+    
+	if(fabs(m_stickX) > 0.1 || fabs(m_stickY) > 0.1 || fabs(m_twistAngle) > 0.1) {
 		//Control for an undefined slope
-		if(m_stickY != 0) {
+        m_angleD = (double)imu.GetAngle(imu.kYaw);
+		
 
-			m_angleR = atan(m_stickX/m_stickY);  //Should be between 90 and -90 degrees
-			m_angleD = (m_angleR * 57.2958);
-		} else if(m_stickX > 0) {
-			m_angleD = 90;
+		frontLeft.F = m_stickTwist * cos((frontLeftAngleToCenter+90)/RtoD) + m_stickY;
+        frontLeft.S = m_stickTwist * sin((frontLeftAngleToCenter + 90)/RtoD) + m_stickX;
+        frontLeft.m_magnitude = std::sqrt(std::pow(frontLeft.F, 2) + std::pow(frontLeft.S, 2));
+        if(frontLeft.F != 0) {
+            
+            frontLeft.m_angle = (atan(frontLeft.S/frontLeft.F) * 57.2958) - m_angleD;
+
+		} else if(frontLeft.F > 0) {
+			frontLeft.m_angle = 90 - m_angleD;
 		} else {
-			m_angleD = -90;
+			frontLeft.m_angle = -90 - m_angleD;
 		}
 		if(m_stickY < 0) {
-    		m_angleD = 180 + m_angleD;
+    		frontLeft.m_angle = 180 + frontLeft.m_angle;
 		} else if(m_stickX < 0){
-		    m_angleD = m_angleD + 360;
+		    frontLeft.m_angle = 360 + frontLeft.m_angle;
 		}
-        frc::SmartDashboard::PutNumber("Joystick Angle",m_angleD);
 
-        m_angleD -= (double)imu.GetAngle(imu.kYaw);
-        //Target angles for all four wheels
-        calculateTurn();
+        frontRight.F = m_stickTwist * cos((frontRightAngleToCenter+90)/RtoD) + m_stickY;
+        frontRight.S = m_stickTwist * sin((frontRightAngleToCenter + 90)/RtoD) + m_stickX;
+        frontRight.m_magnitude = std::sqrt(std::pow(frontRight.F, 2) + std::pow(frontRight.S, 2));
+        if(frontRight.F != 0) {
+            
+            frontRight.m_angle = (atan(frontRight.S/frontRight.F) * 57.2958) - m_angleD;
+
+		} else if(frontRight.F > 0) {
+			frontRight.m_angle = 90 - m_angleD;
+		} else {
+			frontRight.m_angle = -90 - m_angleD;
+		}
+		if(m_stickY < 0) {
+    		frontRight.m_angle = 180 + frontRight.m_angle;
+		} else if(m_stickX < 0){
+		    frontRight.m_angle = 360 + frontRight.m_angle;
+		}
+
+        backLeft.F = m_stickTwist * cos((backLeftAngleToCenter+90)/RtoD) + m_stickY;
+        backLeft.S = m_stickTwist * sin((backLeftAngleToCenter + 90)/RtoD) + m_stickX;
+        backLeft.m_magnitude = std::sqrt(std::pow(backLeft.F, 2) + std::pow(backLeft.S, 2));
+        if(backLeft.F != 0) {
+            
+            backLeft.m_angle = (atan(backLeft.S/backLeft.F) * 57.2958) - m_angleD;
+
+		} else if(backLeft.F > 0) {
+			backLeft.m_angle = 90 - m_angleD;
+		} else {
+			backLeft.m_angle = -90 - m_angleD;
+		}
+		if(m_stickY < 0) {
+    		backLeft.m_angle = 180 + backLeft.m_angle;
+		} else if(m_stickX < 0){
+		    backLeft.m_angle = 360 + backLeft.m_angle;
+		}
+
+        backRight.F = m_stickTwist * cos((backRightAngleToCenter+90)/RtoD) + m_stickY;
+        backRight.S = m_stickTwist * sin((backRightAngleToCenter + 90)/RtoD) + m_stickX;
+        backRight.m_magnitude = std::sqrt(std::pow(backRight.F, 2) + std::pow(backRight.S, 2));
+        if(backRight.F != 0) {
+            
+            backRight.m_angle = (atan(backRight.S/backRight.F) * 57.2958) - m_angleD;
+
+		} else if(backRight.F > 0) {
+			backRight.m_angle = 90 - m_angleD;
+		} else {
+			backRight.m_angle = -90 - m_angleD;
+		}
+		if(m_stickY < 0) {
+    		backRight.m_angle = 180 + backRight.m_angle;
+		} else if(m_stickX < 0){
+		    backRight.m_angle = 360 + backRight.m_angle;
+		}
+
+        magMax=fmax(fabs(frontLeft.m_magnitude),fmax(fabs(frontRight.m_magnitude), fmax(fabs(backLeft.m_magnitude),fabs(backRight.m_magnitude))));
+        if(magMax > 1) {
+            frontLeft.m_magnitude /= magMax;
+            frontRight.m_magnitude /= magMax;
+            backLeft.m_magnitude /= magMax;
+            backRight.m_magnitude /= magMax;
+        }
+
+        frontLeft.setRotation(frontLeft.m_angle);
+        frontLeft.setDrive(-frontLeft.m_magnitude);
+
+        frontRight.setRotation(frontRight.m_angle);
+        frontRight.setDrive(frontRight.m_magnitude);
+
+        backLeft.setRotation(backLeft.m_angle);
+        backLeft.setDrive(-backLeft.m_magnitude);
+
+        backRight.setRotation(backRight.m_angle);
+        backRight.setDrive(-backRight.m_magnitude);
+
+
+
+        
+
 
     } else if(fabs(m_stickTwist) >= 0.6) {
         inPlaceTurn();
@@ -204,56 +282,7 @@ double swerveDrive::turnClosest(double a, double b) {
     return(targetAngle);
 }
 
-void swerveDrive::calculateTurn(){
-    this->m_stickTwist *= 1;
 
-    fMag = m_magnitude * cos(m_angleD/RtoD);
-    sMag = m_magnitude * sin(m_angleD/RtoD);
-
-    //Front left wheel
-    frontLeft.F = m_stickTwist*cos((frontLeftAngleToCenter+90)/RtoD) + fMag;
-    frontLeft.S = m_stickTwist*sin((frontLeftAngleToCenter + 90)/RtoD) + sMag;
-    frontLeft.m_magnitude = std::sqrt(std::pow(frontLeft.F, 2) + std::pow(frontLeft.S, 2))*frontLeft.F/fabs(frontLeft.F);
-    frontLeft.m_angle = atan(frontLeft.S/frontLeft.F) * RtoD;
-
-    //Front right wheel
-    frontRight.F = m_stickTwist*cos((frontRightAngleToCenter+90)/RtoD) + fMag;
-    frontRight.S = m_stickTwist*sin((frontRightAngleToCenter + 90)/RtoD) + sMag;
-    frontRight.m_magnitude = std::sqrt(std::pow(frontRight.F, 2) + std::pow(frontRight.S, 2))*frontRight.F/fabs(frontRight.F);
-    frontRight.m_angle = atan(frontRight.S/frontRight.F) * RtoD;
-
-    //Back left wheel
-    backLeft.F = m_stickTwist*cos((backLeftAngleToCenter+90)/RtoD) + fMag;
-    backLeft.S = m_stickTwist*sin((backLeftAngleToCenter + 90)/RtoD) + sMag;
-    backLeft.m_magnitude = std::sqrt(std::pow(backLeft.F, 2) + std::pow(backLeft.S, 2))*backLeft.F/fabs(backLeft.F);
-    backLeft.m_angle = atan(backLeft.S/backLeft.F) * RtoD;
-
-    //Back right wheel
-    backRight.F = m_stickTwist*cos((backRightAngleToCenter+90)/RtoD) + fMag;
-    backRight.S = m_stickTwist*sin((backRightAngleToCenter + 90)/RtoD) + sMag;
-    backRight.m_magnitude = std::sqrt(std::pow(backRight.F, 2) + std::pow(backRight.S, 2))*backRight.F/fabs(backRight.F);
-    backRight.m_angle = atan(backRight.S/backRight.F) * RtoD;
-
-    magMax=fmax(fabs(frontLeft.m_magnitude),fmax(fabs(frontRight.m_magnitude), fmax(fabs(backLeft.m_magnitude),fabs(backRight.m_magnitude))));
-    if(magMax > 1) {
-        frontLeft.m_magnitude /= magMax;
-        frontRight.m_magnitude /= magMax;
-        backLeft.m_magnitude /= magMax;
-        backRight.m_magnitude /= magMax;
-    }
-
-    frontLeft.setRotation(frontLeft.m_angle);
-    frontLeft.setDrive(-frontLeft.m_magnitude);
-
-    frontRight.setRotation(frontRight.m_angle);
-    frontRight.setDrive(frontRight.m_magnitude);
-
-    backLeft.setRotation(backLeft.m_angle);
-    backLeft.setDrive(-backLeft.m_magnitude);
-
-    backRight.setRotation(backRight.m_angle);
-    backRight.setDrive(-backRight.m_magnitude);
-}
 
 double swerveWheel::getEncoder() {
     return(this->rel->GetPosition());
@@ -292,30 +321,105 @@ void swerveDrive::robotRelativeDrive(){
     
     m_stickY = -driveStick->GetY();
     m_stickX = -driveStick->GetX();
-    m_stickTwist = driveStick->GetTwist();
+    m_stickTwist = -driveStick->GetTwist();
 
-    double m_magnitude = std::sqrt(std::pow(fabs(m_stickY), 2) + std::pow(fabs(m_stickX), 2)); //Pythagorean theorem
-	if(m_magnitude > 0.2) {
-        m_magnitude = (m_magnitude - 0.2) * 1.25;
-
+    
+	if(fabs(m_stickX) > 0.1 || fabs(m_stickY) > 0.1 || fabs(m_twistAngle) > 0.1) {
 		//Control for an undefined slope
-		if(m_stickY != 0) {
+        m_angleD = 0;
+		
 
-			m_angleR = atan(m_stickX/m_stickY);  //Should be between 90 and -90 degrees
-			m_angleD = (m_angleR * 57.2958);
-		} else if(m_stickX > 0) {
-			m_angleD = 90;
+		frontLeft.F = m_stickTwist * cos((frontLeftAngleToCenter+90)/RtoD) + m_stickY;
+        frontLeft.S = m_stickTwist * sin((frontLeftAngleToCenter + 90)/RtoD) + m_stickX;
+        frontLeft.m_magnitude = std::sqrt(std::pow(frontLeft.F, 2) + std::pow(frontLeft.S, 2));
+        if(frontLeft.F != 0) {
+            
+            frontLeft.m_angle = (atan(frontLeft.S/frontLeft.F) * 57.2958) - m_angleD;
+
+		} else if(frontLeft.F > 0) {
+			frontLeft.m_angle = 90 - m_angleD;
 		} else {
-			m_angleD = -90;
+			frontLeft.m_angle = -90 - m_angleD;
 		}
 		if(m_stickY < 0) {
-    		m_angleD = 180 + m_angleD;
+    		frontLeft.m_angle = 180 + frontLeft.m_angle;
 		} else if(m_stickX < 0){
-		    m_angleD = m_angleD + 360;
+		    frontLeft.m_angle = 360 + frontLeft.m_angle;
 		}
-        frc::SmartDashboard::PutNumber("Joystick Angle",m_angleD);
-        //Target angles for all four wheels
-        calculateTurn();
+
+        frontRight.F = m_stickTwist * cos((frontRightAngleToCenter+90)/RtoD) + m_stickY;
+        frontRight.S = m_stickTwist * sin((frontRightAngleToCenter + 90)/RtoD) + m_stickX;
+        frontRight.m_magnitude = std::sqrt(std::pow(frontRight.F, 2) + std::pow(frontRight.S, 2));
+        if(frontRight.F != 0) {
+            
+            frontRight.m_angle = (atan(frontRight.S/frontRight.F) * 57.2958) - m_angleD;
+
+		} else if(frontRight.F > 0) {
+			frontRight.m_angle = 90 - m_angleD;
+		} else {
+			frontRight.m_angle = -90 - m_angleD;
+		}
+		if(m_stickY < 0) {
+    		frontRight.m_angle = 180 + frontRight.m_angle;
+		} else if(m_stickX < 0){
+		    frontRight.m_angle = 360 + frontRight.m_angle;
+		}
+
+        backLeft.F = m_stickTwist * cos((backLeftAngleToCenter+90)/RtoD) + m_stickY;
+        backLeft.S = m_stickTwist * sin((backLeftAngleToCenter + 90)/RtoD) + m_stickX;
+        backLeft.m_magnitude = std::sqrt(std::pow(backLeft.F, 2) + std::pow(backLeft.S, 2));
+        if(backLeft.F != 0) {
+            
+            backLeft.m_angle = (atan(backLeft.S/backLeft.F) * 57.2958) - m_angleD;
+
+		} else if(backLeft.F > 0) {
+			backLeft.m_angle = 90 - m_angleD;
+		} else {
+			backLeft.m_angle = -90 - m_angleD;
+		}
+		if(m_stickY < 0) {
+    		backLeft.m_angle = 180 + backLeft.m_angle;
+		} else if(m_stickX < 0){
+		    backLeft.m_angle = 360 + backLeft.m_angle;
+		}
+
+        backRight.F = m_stickTwist * cos((backRightAngleToCenter+90)/RtoD) + m_stickY;
+        backRight.S = m_stickTwist * sin((backRightAngleToCenter + 90)/RtoD) + m_stickX;
+        backRight.m_magnitude = std::sqrt(std::pow(backRight.F, 2) + std::pow(backRight.S, 2));
+        if(backRight.F != 0) {
+            
+            backRight.m_angle = (atan(backRight.S/backRight.F) * 57.2958) - m_angleD;
+
+		} else if(backRight.F > 0) {
+			backRight.m_angle = 90 - m_angleD;
+		} else {
+			backRight.m_angle = -90 - m_angleD;
+		}
+		if(m_stickY < 0) {
+    		backRight.m_angle = 180 + backRight.m_angle;
+		} else if(m_stickX < 0){
+		    backRight.m_angle = 360 + backRight.m_angle;
+		}
+
+        magMax=fmax(fabs(frontLeft.m_magnitude),fmax(fabs(frontRight.m_magnitude), fmax(fabs(backLeft.m_magnitude),fabs(backRight.m_magnitude))));
+        if(magMax > 1) {
+            frontLeft.m_magnitude /= magMax;
+            frontRight.m_magnitude /= magMax;
+            backLeft.m_magnitude /= magMax;
+            backRight.m_magnitude /= magMax;
+        }
+
+        frontLeft.setRotation(frontLeft.m_angle);
+        frontLeft.setDrive(-frontLeft.m_magnitude);
+
+        frontRight.setRotation(frontRight.m_angle);
+        frontRight.setDrive(frontRight.m_magnitude);
+
+        backLeft.setRotation(backLeft.m_angle);
+        backLeft.setDrive(-backLeft.m_magnitude);
+
+        backRight.setRotation(backRight.m_angle);
+        backRight.setDrive(-backRight.m_magnitude);
 
     } else if(fabs(m_stickTwist) >= 0.6) {
         inPlaceTurn();
